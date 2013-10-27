@@ -1,0 +1,26 @@
+---
+- name: Update apt sources
+  apt: update_cache=yes
+
+- name: Install apt packages
+  apt: pkg={{item}} state=present
+  with_items:
+    - build-essential
+    - python-pip
+    - python-dev
+
+- name: Download whitedb
+  get_url: url={{download_url}} dest=/tmp/whitedb.tar.gz
+
+- name: Extract and build whitedb
+  command: tar -xf /tmp/whitedb.tar.gz -C /home/vagrant creates=/home/vagrant/{{version_name}}
+
+- name: Configure whitedb
+  command: $item chdir=/home/vagrant/{{version_name}} creates=/usr/local/bin/wgdb
+  with_items:
+    - "./configure --with-python"
+    - "make"
+    - "make install"
+
+- name: Configure shared memory
+  sysctl: name=kernel.shmmax value=100000000 state=present
