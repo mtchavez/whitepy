@@ -8,6 +8,8 @@
     - build-essential
     - python-pip
     - python-dev
+    - sqlite3
+    - libsqlite3-dev
 
 - name: Download whitedb
   get_url: url={{download_url}} dest=/tmp/whitedb.tar.gz
