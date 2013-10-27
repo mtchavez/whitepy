@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="meta">
+    <span>Views - {{meta.views}}</span>
+    <span class="green">▲{{meta.upvotes}}</span>
+    <span class="red">▼{{meta.downvotes}}</span>
+</div>
+<h2>
+    <a href="/entry/{{entry.eid}}">{{ entry.title }}</a>
+</h2>
+<div>
+    {{ entry.text|safe }}
+</div>
+{% endblock %}
