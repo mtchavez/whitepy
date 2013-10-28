@@ -1,5 +1,7 @@
 <!doctype html>
-<title>Flaskr</title>
+<head>
+  <title>Microbloggr</title>
+</head>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <div class=page>
   <h1><a href="/">Microbloggr</a></h1>
@@ -14,4 +16,11 @@
     <div class=flash>{{ message }}</div>
   {% endfor %}
   {% block body %}{% endblock %}
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script type="text/javascript">
+    $(function() {
+      {% block js %}{% endblock %}
+    });
+  </script>
 </div>

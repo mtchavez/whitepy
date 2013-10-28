@@ -87,6 +87,33 @@ def show_entry(entry_id):
     return render_template('entry.html', entry=entry, meta=meta)
 
 
+@app.route('/entry/<int:entry_id>/upvote', methods=['POST'])
+def entry_upvote(entry_id):
+    try:
+        query = wgdb.make_query(g.wdb, arglist=[(0, wgdb.COND_EQUAL, entry_id)])
+        rec = wgdb.fetch(g.wdb, query)
+    except Exception, e:
+        rec = wgdb.create_record(g.wdb, 10)
+        wgdb.set_field(g.wdb, rec, 0, entry_id)
+    upvotes = wgdb.get_field(g.wdb, rec, 2)
+    upvotes = upvotes + 1 if upvotes else 1
+    wgdb.set_field(g.wdb, rec, 2, upvotes)
+    return '{"upvotes": %d}' % upvotes
+
+@app.route('/entry/<int:entry_id>/downvote', methods=['POST'])
+def entry_downvote(entry_id):
+    try:
+        query = wgdb.make_query(g.wdb, arglist=[(0, wgdb.COND_EQUAL, entry_id)])
+        rec = wgdb.fetch(g.wdb, query)
+    except Exception, e:
+        rec = wgdb.create_record(g.wdb, 10)
+        wgdb.set_field(g.wdb, rec, 0, entry_id)
+    downvotes = wgdb.get_field(g.wdb, rec, 3)
+    downvotes = downvotes + 1 if downvotes else 1
+    wgdb.set_field(g.wdb, rec, 3, downvotes)
+    return '{"downvotes": %d}' % downvotes
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None

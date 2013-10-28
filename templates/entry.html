@@ -1,9 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="meta">
-    <span>Views - {{meta.views}}</span>
-    <span class="green">▲{{meta.upvotes}}</span>
-    <span class="red">▼{{meta.downvotes}}</span>
+    <div>Views - {{meta.views}}</div>
+    <div class="green">
+        <a class="vote" href="#upvote">▲</a>
+        <span id="upvotes">{{meta.upvotes}}</span>
+    </div>
+    <div class="red">
+        <a class="vote" href="#downvote">▼</a>
+        <span id="downvotes">{{meta.downvotes}}</span>
+    </div>
 </div>
 <h2>
     <a href="/entry/{{entry.eid}}">{{ entry.title }}</a>
@@ -12,3 +18,20 @@
     {{ entry.text|safe }}
 </div>
 {% endblock %}
+
+{% block js %}
+$("a.vote").click(function(e){
+    e.preventDefault();
+    var action = $(this).attr('href').replace('#', '');
+    var total = parseInt($(action + 's').html())
+    $.ajax({
+      type: "POST",
+      url: "/entry/{{entry.eid}}/" + action,
+      data: {},
+      success: function(data){
+        $('#' + action + 's').html(data[action + 's'])
+      },
+      dataType: "JSON"
+    });
+})
+{% endblock %}i
