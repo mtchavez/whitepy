@@ -1,7 +1,10 @@
 from contextlib import closing
 import sqlite3
+
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
+import wgdb
+import whitedb
 
 
 # configuration
@@ -29,6 +32,7 @@ def init_db():
 @app.before_request
 def before_request():
     g.db = connect_db()
+    g.wdb = wgdb.attach_database()
 
 @app.teardown_request
 def teardown_request(exception):
@@ -48,10 +52,13 @@ def show_entries():
 def add_entry():
     if not session.get('logged_in'):
         abort(401)
-    g.db.execute('insert into entries (title, text) values (?, ?)',
+    cursor = g.db.cursor()
+    cursor.execute('insert into entries (title, text) values (?, ?)',
                  [request.form['title'], request.form['text']])
-    g.db.commit()
     flash('New entry was successfully posted')
+    g.db.commit()
+    record = wgdb.create_record(g.wdb, 10)
+    wgdb.set_field(g.wdb, record, 0, cursor.lastrowid)
     return redirect(url_for('show_entries'))
 
 
@@ -61,6 +68,22 @@ def show_entry(entry_id):
     row = cur.fetchone()
     entry = dict(eid=row[0], title=row[1], text=row[2])
     meta = dict(views=0, upvotes=0, downvotes=0)
+
+    try:
+        query = wgdb.make_query(g.wdb, arglist=[(0, wgdb.COND_EQUAL, entry_id)])
+        rec = wgdb.fetch(g.wdb, query)
+    except Exception, e:
+        rec = wgdb.create_record(g.wdb, 10)
+        wgdb.set_field(g.wdb, rec, 0, entry_id)
+    
+    _, views, upvotes, downvotes = [wgdb.get_field(g.wdb, rec, col) for col in range(4)]
+    views = views + 1 if views else 1
+    if upvotes:
+        meta['upvotes'] = upvotes
+    if downvotes:
+        meta['downvotes'] = downvotes
+    wgdb.set_field(g.wdb, rec, 1, views)
+    meta['views'] = views
     return render_template('entry.html', entry=entry, meta=meta)
 
 
