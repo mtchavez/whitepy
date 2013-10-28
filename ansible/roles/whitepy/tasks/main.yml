@@ -26,3 +26,6 @@
 
 - name: Configure shared memory
   sysctl: name=kernel.shmmax value=100000000 state=present
+
+- name: Install requirements
+  command: pip install -r requirements.txt chdir=/srv/app
